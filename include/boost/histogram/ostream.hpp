@@ -11,6 +11,8 @@
 #include <boost/histogram/axis/ostream.hpp>
 #include <boost/histogram/fwd.hpp>
 #include <iosfwd>
+#include <type_traits>
+//#include <boost/histogram/display.hpp>
 
 /**
   \file boost/histogram/ostream.hpp
@@ -27,15 +29,58 @@
 
 namespace boost {
 namespace histogram {
+namespace detail {
 
-template <typename CharT, typename Traits, typename A, typename S>
-std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os,
-                                              const histogram<A, S>& h) {
+// template <class T>
+// std::false_type f_alternative_exist_f (std::ostream &, T const &, long);
+
+// template <class T>
+// auto f_alternative_exist_f (std::ostream & os, T const & t, int)
+//    -> decltype( ostream_prototype(os, t), std::true_type{} );
+
+// template <class T>
+// using f_alternative_exist
+//    = decltype(f_alternative_exist_f(std::declval<std::ostream &>(),
+//                                     std::declval<T>(), 0));
+
+
+// template<class T>
+// static constexpr bool f_alternative_exist_v = 0; // f_alternative_exist<T>::value;
+
+
+
+
+// template<class T, typename CharT, typename Traits, typename A, typename S, 
+// typename std::enable_if <((std::rank<T>::value > 1) || (false == alternative_ostream_v<T>)),
+// int>::type = 0>
+// void ostream_prototype(std::basic_ostream<CharT, Traits>& os,
+//                        const histogram<A, S>& h) {
+//   os << "histogram(";
+//   h.for_each_axis([&](const auto& a) { os << "\n  " << a << ","; });
+//   std::size_t i = 0;
+//   for (auto&& x : h) os << "\n  " << i++ << ": " << x;
+//   os << (h.rank() ? "\n)" : ")");
+// }
+
+} // namespace detail
+
+template<class T, 
+typename CharT, typename Traits, typename A, typename S,
+typename std::enable_if <((std::rank<T>::value != 1)),
+int>::type = 0>
+void ostream_prototype(std::basic_ostream<CharT, Traits>& os,
+                       const histogram<A, S>& h) {
   os << "histogram(";
   h.for_each_axis([&](const auto& a) { os << "\n  " << a << ","; });
   std::size_t i = 0;
   for (auto&& x : h) os << "\n  " << i++ << ": " << x;
   os << (h.rank() ? "\n)" : ")");
+}
+
+template <typename CharT, typename Traits, typename A, typename S>
+std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os,
+                                              const histogram<A, S>& h) {
+  ostream_prototype<decltype(h)>(os, h);
   return os;
 }
 

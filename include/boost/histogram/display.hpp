@@ -11,13 +11,13 @@
 #include <boost/histogram/accumulators/ostream.hpp>
 #include <boost/histogram/axis/ostream.hpp>
 #include <boost/histogram/fwd.hpp>
+#include <boost/histogram/ostream.hpp>
 #include <iosfwd>
 #include <algorithm> //max_element
 #include <iomanip>   //setw
 #include <iostream>  //cout
 #include <cmath>     //floor, pow
 #include <limits>    //infinity
-
 
 namespace boost {
 namespace histogram {
@@ -200,28 +200,13 @@ void display_histogram(std::ostream& out,
   draw_histogram(out, h, u_bounds_width, l_bounds_width, values_width);
 }
 
-template <class Histogram>
-void old_style_ostream(std::ostream& os, const Histogram& h) {
-  if(os.width() != 0)
-      os.width(0); // ignore setw
+} // ns detail
 
-  os << "\n";
-  stream_line(os, d_s.margin, ' ', false);
-  os << "histogram(";
-  unsigned n = 0;
-  h.for_each_axis([&](const auto& a) {
-    if (h.rank() > 1) os << "\n  ";
-    stream_line(os, d_s.margin, ' ', false);
-    os  << a;
-    if (++n < h.rank()) os << ",";
-  });
-  os << (h.rank() > 1 ? "\n" : ")");
-  stream_line(os, d_s.margin, ' ', false);
-  os << ")\n";
-}
-
-template <class Histogram>
-void new_style_ostream(std::ostream& os, const Histogram& h) {
+template<class T, 
+typename CharT, typename Traits, typename A, typename S,
+typename std::enable_if <((std::rank<T>::value == 1), int>::type = 0 >
+void ostream_prototype(std::basic_ostream<CharT, Traits>& os, 
+                       const histogram<A, S>& h) {
   const auto exp_width = static_cast< unsigned int >(os.width());
   if (exp_width == 0)
     display_histogram(os, h);
@@ -231,20 +216,38 @@ void new_style_ostream(std::ostream& os, const Histogram& h) {
   }
 }
 
-} // ns detail
+// template <class Histogram>
+// void old_style_ostream(std::ostream& os, const Histogram& h) {
+//   if(os.width() != 0)
+//       os.width(0); // ignore setw
+
+//   os << "\n";
+//   stream_line(os, d_s.margin, ' ', false);
+//   os << "histogram(";
+//   unsigned n = 0;
+//   h.for_each_axis([&](const auto& a) {
+//     if (h.rank() > 1) os << "\n  ";
+//     stream_line(os, d_s.margin, ' ', false);
+//     os  << a;
+//     if (++n < h.rank()) os << ",";
+//   });
+//   os << (h.rank() > 1 ? "\n" : ")");
+//   stream_line(os, d_s.margin, ' ', false);
+//   os << ")\n";
+// }
 
 
-template <typename CharT, typename Traits, typename A, typename S>
-std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os,
-                                              const histogram<A, S>& h) {
+// template <typename CharT, typename Traits, typename A, typename S>
+// std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os,
+//                                               const histogram<A, S>& h) {
 
-  if(h.rank() == 1)
-    detail::new_style_ostream(os, h);
-  else
-    detail::old_style_ostream(os, h);
+//   if(h.rank() == 1)
+//     detail::new_style_ostream(os, h);
+//   else
+//     detail::old_style_ostream(os, h);
 
-  return os;
-}
+//   return os;
+// }
 
 } // ns histogram
 } // ns boost
