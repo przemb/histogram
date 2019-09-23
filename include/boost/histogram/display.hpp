@@ -204,7 +204,7 @@ void display_histogram(std::ostream& out,
 
 template<class T, 
 typename CharT, typename Traits, typename A, typename S,
-typename std::enable_if <((std::rank<T>::value == 1), int>::type = 0 >
+typename std::enable_if <(T::rank() == 1), int>::type = 0 >
 void ostream_prototype(std::basic_ostream<CharT, Traits>& os, 
                        const histogram<A, S>& h) {
   const auto exp_width = static_cast< unsigned int >(os.width());

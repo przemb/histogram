@@ -12,7 +12,7 @@
 #include <boost/histogram/fwd.hpp>
 #include <iosfwd>
 #include <type_traits>
-//#include <boost/histogram/display.hpp>
+#include <boost/histogram/display.hpp>
 
 /**
   \file boost/histogram/ostream.hpp
@@ -66,7 +66,7 @@ namespace detail {
 
 template<class T, 
 typename CharT, typename Traits, typename A, typename S,
-typename std::enable_if <((std::rank<T>::value != 1)),
+typename std::enable_if <((T::rank() != 1)),
 int>::type = 0>
 void ostream_prototype(std::basic_ostream<CharT, Traits>& os,
                        const histogram<A, S>& h) {
